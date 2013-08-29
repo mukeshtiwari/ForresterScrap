@@ -41,8 +41,12 @@ class ForresterScrap():
 		blogtime = ' '.join ( page.find('p').renderContents().split('</a>')[-1].strip().split(' ')[2:] )
 		recom = ' '.join ( [ page.find ( 'span' , attrs = { 'class':'recommCount'} ).renderContents() , 'recommendation' ] )
 		fpart = ' # '.join ( [ beforetweet, blogtime, recom ] )
-		for category in afterreadmore:
-			print ' # '.join ( [ 'Blog', url, fpart , category ] ) 
+
+		if afterreadmore == [] :
+			print ' # '.join ( [ 'Blog', url, fpart, ' ' ] )
+		else: 
+			for category in afterreadmore:
+				print ' # '.join ( [ 'Blog', url, fpart , category ] ) 
 
 
 
