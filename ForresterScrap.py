@@ -25,21 +25,24 @@ class ForresterScrap():
 			counter += 1
 			
 	def parseStatement( self, page ):
-		#print 'Start of a tag\n'
 
 		atag = page.findAll('a')
 		url = ''.join ( [ self.baseurl, atag[0]['href'] ] )
 		#print url
-		info = ' # '.join ( [ tag.renderContents() for tag in atag ] )
-		print ' # '.join( ['Blog', url, info ])
-		#for tag in atag:
-		#	print tag.renderContents()
-		#print 'End of a tag\n'
-		#print 'Start of ptag\n'
-		#ptag = page.findAll('p')
-		#for tag in ptag:
-		#	print tag
-		#print 'End of ptag'
+		info = [ tag.renderContents() for tag in atag ] 
+		beforetweet = ' # '.join ( info [ 0 : info.index('Tweet') ] )
+		afterreadmore = []
+		#beware some article may not have Read more
+		try:
+			afterreadmore = info [ info.index('Read more')+1 : ]
+		except ValueError:
+			afterreadmore = []
+
+		blogtime = ' '.join ( page.find('p').renderContents().split('</a>')[-1].strip().split(' ')[2:] )
+		recom = ' '.join ( [ page.find ( 'span' , attrs = { 'class':'recommCount'} ).renderContents() , 'recommendation' ] )
+		fpart = ' # '.join ( [ beforetweet, blogtime, recom ] )
+		for category in afterreadmore:
+			print ' # '.join ( [ 'Blog', url, fpart , category ] ) 
 
 
 
