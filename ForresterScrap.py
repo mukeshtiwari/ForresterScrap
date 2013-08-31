@@ -19,7 +19,7 @@ class ForresterScrap():
 		
 	#don't catch erros here. It's error mode run so it's should be error free otherwise we will have lot of duplicate data. 
 	def downloadErrorMode ( self ):
-		with open('forrester.dat', 'a+' ) as f ,  open ('pagedownloaderror.dat', 'r' ) as p :
+		with open('forrester.dat', 'a' ) as f ,  open ('pagedownloaderror.dat', 'r' ) as p :
 			for counter in p:
 				url = ''.join( [ self.baseurl, '/?page=',  counter ] )
 				pagelist = self.downloadUrl( url )
@@ -34,7 +34,7 @@ class ForresterScrap():
 		counter = 0
 		self.n = self.numberofPages( )
 		print ''.join ( [ 'Total number of pages = ', str ( self.n ) ] )
-		with open('forrester.dat', 'a+' ) as f ,  open ('pagedownloaderror.dat', 'a+' ) as p :
+		with open('forrester.dat', 'a' ) as f ,  open ('pagedownloaderror.dat', 'a+' ) as p :
 			while ( counter <= self.n ):
 				try:
 					url = ''.join( [ self.baseurl, '/?page=', str ( counter ) ] )
