@@ -12,14 +12,24 @@ class ForresterScrap():
 		pass
 	
 	def numberofPages( self ):
-		page = urllib2.urlopen( self.baseurl ) . read()
-		soup = BeautifulSoup ( page , 'lxml' )
-		return int ( soup.find( 'li', attrs = { 'class' :'pager-last last' } ).find( 'a' )['href'].split('=')[-1] )
-
+		try:
+			page = urllib2.urlopen( self.baseurl ) . read()
+			soup = BeautifulSoup ( page , 'lxml' )
+			return int ( soup.find( 'li', attrs = { 'class' :'pager-last last' } ).find( 'a' )['href'].split('=')[-1] )
+		except urllib2.HTTPError as e:
+			print ''.join ( [ self.baseurl, '  ', str ( e ) ] ) 
+			return 0
+		except urllib2.URLError as e:
+			print ''.join ( [ self.baseurl, '  ', str ( e ) ] ) 
+			return 0
+		except Exception as e:
+			print ''.join ( [ self.baseurl, '  ', str ( e ) ] )
+			return 0
 		
 	def downloadPage( self  ):
 		counter = 0
 		self.n = self.numberofPages( )
+		print ''.join ( [ 'Total number of pages = ', str ( self.n ) ] )
 		with open('forrester.dat', 'a+' ) as f ,  open ('pagedownloaderror.dat', 'a+' ) as p :
 			while ( counter <= self.n ):
 				try:
@@ -27,12 +37,15 @@ class ForresterScrap():
 					pagelist =  self.download( url ) 
 					f.write ( '\n'.join ( [ page for page in pagelist  ] ) )
 				except urllib2.HTTPError as e:
+					print ''.join ( [ self.baseurl, '  ', str ( e ) ] )
 					p.write( ''.join ( [ str ( counter ), '\n' ] ) ) 
 				except urllib2.URLError as e:
+					print ''.join ( [ self.baseurl, '  ', str ( e ) ] ) 
 					p.write( ''.join ( [ str ( counter ), '\n' ] ) )
 				except Exception as e:
+					print ''.join ( [ self.baseurl, '  ', str ( e ) ] ) 
 					p.write( ''.join ( [ str ( counter ), '\n' ] ) )
-				print counter
+				print ''.join( [ 'Downloaded page ', str ( counter ) ] )
 				counter += 1
 			
 	def download( self, url ):
