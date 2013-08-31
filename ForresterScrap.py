@@ -6,24 +6,42 @@ class ForresterScrap():
 	
 	def __init__( self ):
 		self.baseurl = 'http://blogs.forrester.com' 
-
+		self.n = 0
 
 	def connectDatabase(self):
 		pass
 	
+	def numberofPages( self ):
+		page = urllib2.urlopen( self.baseurl ) . read()
+		soup = BeautifulSoup ( page , 'lxml' )
+		return int ( soup.find( 'li', attrs = { 'class' :'pager-last last' } ).find( 'a' )['href'].split('=')[-1] )
+
+		
 	def downloadPage( self  ):
-		#Run a infinite loop and maintain the node id in Map/Hash. If it's repeating then stop loop. 
 		counter = 0
-		while ( counter <= 0 ):
-			url = ''.join( [ self.baseurl, '/?page', str ( counter ) ] )
-			page = urllib2.urlopen(url).read()
-			soup = BeautifulSoup ( page, 'lxml' ) 
-			pagelist = soup.findAll ( 'div', attrs = { 'id' : re.compile ( r'node-[0-9]{1,}' ) } )
-			for page in pagelist:
-				self.parseStatement( page  )
-				print '\n\n'
-			counter += 1
+		self.n = self.numberofPages( )
+		with open('forrester.dat', 'a+' ) as f ,  open ('pagedownloaderror.dat', 'a+' ) as p :
+			while ( counter <= self.n ):
+				try:
+					url = ''.join( [ self.baseurl, '/?page=', str ( counter ) ] )
+					pagelist =  self.download( url ) 
+					f.write ( '\n'.join ( [ page for page in pagelist  ] ) )
+				except urllib2.HTTPError as e:
+					p.write( ''.join ( [ str ( counter ), '\n' ] ) ) 
+				except urllib2.URLError as e:
+					p.write( ''.join ( [ str ( counter ), '\n' ] ) )
+				except Exception as e:
+					p.write( ''.join ( [ str ( counter ), '\n' ] ) )
+				print counter
+				counter += 1
 			
+	def download( self, url ):
+		page = urllib2.urlopen(url).read()
+		soup = BeautifulSoup ( page, 'lxml' ) 
+		pagelist = soup.findAll ( 'div', attrs = { 'id' : re.compile ( r'node-[0-9]{1,}' ) } )
+		return [ self.parseStatement ( page ) for page in pagelist ]
+
+
 	def parseStatement( self, page ):
 
 		atag = page.findAll('a')
@@ -43,11 +61,11 @@ class ForresterScrap():
 		fpart = ' # '.join ( [ beforetweet, blogtime, recom ] )
 
 		if afterreadmore == [] :
-			print ' # '.join ( [ 'Blog', url, fpart, ' ' ] )
+			return ' # '.join ( [ 'Blog', url, fpart, ' ' ] )
 		else: 
-			for category in afterreadmore:
-				print ' # '.join ( [ 'Blog', url, fpart , category ] ) 
-
+			#for category in afterreadmore:
+			#	print ' # '.join ( [ 'Blog', url, fpart , category ] ) 
+			return '\n'.join ( [ ' # '.join ( [ 'Blog', url, fpart , category ] ) for category in afterreadmore ] )
 
 
 if __name__=='__main__':
