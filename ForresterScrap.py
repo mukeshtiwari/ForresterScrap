@@ -11,21 +11,25 @@ class ForresterScrap():
 	def connectDatabase(self):
 		pass
 	
+	#don't catch exception here and let the program die. It's fetch the total number of pages so if there is error then die.
 	def numberofPages( self ):
-		try:
 			page = urllib2.urlopen( self.baseurl ) . read()
 			soup = BeautifulSoup ( page , 'lxml' )
 			return int ( soup.find( 'li', attrs = { 'class' :'pager-last last' } ).find( 'a' )['href'].split('=')[-1] )
-		except urllib2.HTTPError as e:
-			print ''.join ( [ self.baseurl, '  ', str ( e ) ] ) 
-			return 0
-		except urllib2.URLError as e:
-			print ''.join ( [ self.baseurl, '  ', str ( e ) ] ) 
-			return 0
-		except Exception as e:
-			print ''.join ( [ self.baseurl, '  ', str ( e ) ] )
-			return 0
 		
+	#don't catch erros here. It's error mode run so it's should be error free otherwise we will have lot of duplicate data. 
+	def downloadErrorMode ( self ):
+		with open('forrester.dat', 'a+' ) as f ,  open ('pagedownloaderror.dat', 'r' ) as p :
+			for counter in p:
+				url = ''.join( [ self.baseurl, '/?page=',  counter ] )
+				pagelist = self.downloadUrl( url )
+				f.write( '\n'.join ( [ page for page in pagelist  ] ) )
+		#If every thing is correct then delete the file or make it empty.
+		with open ('pagedownloaderror.dat', 'w' ) as p :
+			p.write('')
+			
+
+				
 	def downloadPage( self  ):
 		counter = 0
 		self.n = self.numberofPages( )
@@ -34,7 +38,7 @@ class ForresterScrap():
 			while ( counter <= self.n ):
 				try:
 					url = ''.join( [ self.baseurl, '/?page=', str ( counter ) ] )
-					pagelist =  self.download( url ) 
+					pagelist =  self.downloadUrl( url ) 
 					f.write ( '\n'.join ( [ page for page in pagelist  ] ) )
 				except urllib2.HTTPError as e:
 					print ''.join ( [ self.baseurl, '  ', str ( e ) ] )
@@ -48,7 +52,7 @@ class ForresterScrap():
 				print ''.join( [ 'Downloaded page ', str ( counter ) ] )
 				counter += 1
 			
-	def download( self, url ):
+	def downloadUrl( self, url ):
 		page = urllib2.urlopen(url).read()
 		soup = BeautifulSoup ( page, 'lxml' ) 
 		pagelist = soup.findAll ( 'div', attrs = { 'id' : re.compile ( r'node-[0-9]{1,}' ) } )
@@ -76,8 +80,6 @@ class ForresterScrap():
 		if afterreadmore == [] :
 			return ' # '.join ( [ 'Blog', url, fpart, ' ' ] )
 		else: 
-			#for category in afterreadmore:
-			#	print ' # '.join ( [ 'Blog', url, fpart , category ] ) 
 			return '\n'.join ( [ ' # '.join ( [ 'Blog', url, fpart , category ] ) for category in afterreadmore ] )
 
 
