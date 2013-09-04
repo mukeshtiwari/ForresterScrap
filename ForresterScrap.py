@@ -1,4 +1,4 @@
-import re, urllib2, os, collections
+import re, urllib2, os, collections, sys
 from bs4 import BeautifulSoup
 
 class OrderedSet(collections.MutableSet):
@@ -93,9 +93,9 @@ class ForresterScrap():
 	def downloadPage( self, numpage = None  ):
 		counter = 0
 		if numpage is not None: 
-			self.n = 2 # numpage
+			self.n =  numpage
 		else:
-			self.n = 2 # self.numberofPages( )
+			self.n = self.numberofPages( )
 		print ''.join ( [ 'Total number of pages = ', str ( self.n ) ] )
 		with open('forrester.dat', 'a' ) as f,  open( 'tmpmerging.dat', 'a' ) as t, open ('pagedownloaderror.dat', 'a' ) as p :
 			while ( counter <= self.n ):
@@ -150,8 +150,16 @@ class ForresterScrap():
 
 if __name__=='__main__':
 
-
+	cmdargs =  ( sys.argv )
+	lcmdargs = len ( cmdargs )
 	forrester = ForresterScrap()
-	forrester.downloadPage()
+	if  lcmdargs == 1 :
+		print 'you are going to download the whole site'
+		forrester.downloadPage()
+	elif lcmdargs == 3 :
+		numpage  = int ( cmdargs [-1] )
+		print 'you are going to download ',' ',numpage
+		forrester.downloadPage ( numpage )
+
 
 
